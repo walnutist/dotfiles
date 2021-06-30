@@ -1,0 +1,46 @@
+# zmodload zsh/zprof
+# setopt PROMPT_SUBST
+# PS4='+$EPOCHREALTIME %N:%i> '
+
+# logfile=$(mktemp zsh_profile.7Pw1Ny0G)
+# echo "Logging to $logfile"
+# exec 3>&2 2>$logfile
+
+# setopt XTRACE
+# Performance Start Ends
+
+export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.ustc.edu.cn/homebrew-bottles
+export ZDOTDIR=~/.zsh
+export EDITOR=subl
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+source /usr/local/opt/powerlevel10k/powerlevel10k.zsh-theme
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+autoload -Uz compinit
+compinit
+
+source $ZDOTDIR/ohmyzsh/lib/directories.zsh
+source $ZDOTDIR/ohmyzsh/lib/key-bindings.zsh
+source $ZDOTDIR/ohmyzsh/plugins/sudo/sudo.plugin.zsh
+source $ZDOTDIR/ohmyzsh/plugins/extract/extract.plugin.zsh
+source $ZDOTDIR/ohmyzsh/plugins/gitfast/gitfast.plugin.zsh
+source $ZDOTDIR/ohmyzsh/plugins/rsync/rsync.plugin.zsh
+source $ZDOTDIR/ohmyzsh/plugins/cp/cp.plugin.zsh
+source $ZDOTDIR/ohmyzsh/plugins/sublime/sublime.plugin.zsh
+
+source $ZDOTDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source $ZDOTDIR/
+source /usr/local/opt/asdf/asdf.sh
+source ~/.asdf/plugins/java/set-java-home.zsh
+# source $ZDOTDIR/z.lua/z.lua.plugin.zsh
+
+source $ZDOTDIR/proxy.zsh
+
+# zprof
+# Performance End Starts
+# unsetopt XTRACE
+# exec 2>&3 3>&-
