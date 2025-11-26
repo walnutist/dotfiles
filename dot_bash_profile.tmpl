@@ -4,6 +4,6 @@
 export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.ustc.edu.cn/homebrew-bottles
 JETBRAIN_CRACK_FILE="${HOME}/.config/jetbrain.vmoptions.sh"
 [ -f "${JETBRAIN_CRACK_FILE}" ] && . "${JETBRAIN_CRACK_FILE}"
-{{ else if eq .chezmoi.os "linux" && eq .chezmoi.osRelease "" }}
+{{ else if eq .chezmoi.os "linux" and eq .chezmoi.osRelease "" }}
 
 {{ end }}
