@@ -1,5 +1,0 @@
-# set PATH so it includes user's private bin if it exists
-[ -d "$HOME/bin" ] && export PATH="$HOME/bin:$PATH"
-[ -d "$HOME/.local/bin" ] && export PATH="$HOME/.local/bin:$PATH"
-
-[ -f ~/.aliases ] && source ~/.aliases
