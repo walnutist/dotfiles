@@ -1,0 +1,9 @@
+[ -f ~/.profile ] && source ~/.profile
+
+{{ if eq .chezmoi.os "darwin" }}
+export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.ustc.edu.cn/homebrew-bottles
+JETBRAIN_CRACK_FILE="${HOME}/.config/jetbrain.vmoptions.sh"
+[ -f "${JETBRAIN_CRACK_FILE}" ] && . "${JETBRAIN_CRACK_FILE}"
+{{ else if eq .chezmoi.os "linux" && eq .chezmoi.osRelease "" }}
+
+{{ end }}
