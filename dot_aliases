@@ -3,12 +3,14 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias .....='cd ../../../..'
-alias -- -="cd -"
+alias -- -='cd -'
 
-alias mkdir="mkdir -p"
-alias e="$EDITOR"
-alias l="ls -al"
-alias ll="ls -l"
+alias e='$EDITOR'
+
+alias ls='ls --color=auto'
+alias l='ls -lah'
+alias la='ls -lAh'
+alias ll='ls -lh'
 
 # 打印PATH
 alias path='echo $PATH | tr -s ":" "\n"'
@@ -17,6 +19,8 @@ alias path='echo $PATH | tr -s ":" "\n"'
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
+alias md='mkdir -p'
+alias rd='rmdir'
 
 # 常用git操作
 alias g='git'
