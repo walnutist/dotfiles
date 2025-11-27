@@ -27,4 +27,5 @@ export ZSH_CONFIG_DIR="$XDG_CONFIG_HOME/zsh"
 export ZSH_CACHE_DIR="$XDG_CACHE_HOME/zsh"
 export ZSH_DATA_DIR="$XDG_DATA_HOME/zsh"
 
-export ZDOTDIR="$ZSH_CONFIG_DIR"
+# 在这里设置ZDOTDIR的话会导致路径和加载混乱，因此必须在zsh4humans的.zshenv中进行设定
+. "$ZSH_CONFIG_DIR"/zshenv4h
