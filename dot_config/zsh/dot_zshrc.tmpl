@@ -1,0 +1,37 @@
+# If not in tmux, start tmux: reads from and writes to the TTY.
+# if [[ -z ${TMUX+X}${ZSH_SCRIPT+X}${ZSH_EXECUTION_STRING+X} ]]; then
+#     exec tmux
+# fi
+
+{{ if eq .chezmoi.os "darwin" -}}
+    BREW_EXECUTABLE='{{ findExecutable "brew" (list "/opt/homebrew/bin" "/usr/local/bin") }}'
+{{ else if eq .chezmoi.os "linux" -}}
+    BREW_EXECUTABLE='{{ findExecutable "brew" (list "/home/linuxbrew/.linuxbrew/bin" "~/.linuxbrew/bin") }}'
+{{ end }}
+[[ -x "$BREW_EXECUTABLE" ]] && eval "$(${BREW_EXECUTABLE} shellenv 2>/dev/null || true)"
+
+# export ZSH_CONFIG_DIR="${ZSH_CONFIG_DIR:-$HOME}"
+# export ZSH_CACHE_DIR="${ZSH_CACHE_DIR:-$HOME}"
+# export ZSH_DATA_DIR="${ZSH_DATA_DIR:-$HOME}"
+# export ZDOTDIR="${ZDOTDIR:-$HOME}"
+
+# 基础体验
+bindkey -e                      # Emacs 键位 (Ctrl+A/E 等)
+setopt AUTO_CD                  # 输入目录名直接跳转
+setopt AUTO_MENU                # 自动菜单补全
+setopt MENU_COMPLETE            # 允许在补全菜单中选择
+setopt NO_BEEP                  # 禁止蜂鸣声
+setopt INTERACTIVE_COMMENTS	    # 交互模式下允许注释
+setopt GLOB_DOTS                # 通配符使用包含隐藏文件
+setopt NO_NOMATCH               # 匹配失败不报错
+
+# 历史记录 (优化去重和查找)
+HISTSIZE=2000                   # 内存中保留的条数
+SAVEHIST=50000                  # 文件中保存的条数
+HISTFILE="${ZSH_CACHE_DIR:-$HOME}/.zsh_history"
+setopt EXTENDED_HISTORY         # 记录时间戳
+setopt SHARE_HISTORY            # 多终端实时共享历史
+setopt HIST_REDUCE_BLANKS       # 删除历史记录中的空行
+setopt HIST_IGNORE_DUPS         # 忽略连续重复命令
+setopt HIST_IGNORE_SPACE        # 忽略空格开头的命令
+setopt HIST_FIND_NO_DUPS        # 搜索时不显示重复项
