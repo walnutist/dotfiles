@@ -131,7 +131,7 @@ if command -v asdf > /dev/null && \
     
     local java_home_script="$HOME/.asdf/plugins/java/set-java-home.zsh"
     if [[ -f "$java_home_script" ]]; then
-        echo "Found java home script at $java_home_script, sourcing it..."
+        # echo "Found java home script at $java_home_script, sourcing it..."
         source "$java_home_script"
     fi
 fi
