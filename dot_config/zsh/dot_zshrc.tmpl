@@ -122,3 +122,16 @@ unset LS_COLORS
 {{ if ne .dircolorsPreset "" -}}
 command -v vivid &> /dev/null && export LS_COLORS="$(vivid generate {{ .dircolorsPreset }})"
 {{ end -}}
+
+# ASDF Java Home
+if command -v asdf > /dev/null && \
+   [[ -z "$JAVA_HOME" ]] && \
+   asdf plugin list | grep -q 'java' && \
+   asdf list java 2>/dev/null | grep -q -E '[a-zA-Z]+-[0-9]+\.[0-9]+\.[0-9]+'; then
+    
+    local java_home_script="$HOME/.asdf/plugins/java/set-java-home.zsh"
+    if [[ -f "$java_home_script" ]]; then
+        echo "Found java home script at $java_home_script, sourcing it..."
+        source "$java_home_script"
+    fi
+fi
