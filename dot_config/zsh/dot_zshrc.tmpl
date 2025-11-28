@@ -34,6 +34,9 @@ setopt hist_ignore_dups         # 忽略连续重复命令
 setopt hist_ignore_space        # 忽略空格开头的命令
 setopt hist_find_no_dups        # 搜索时不显示重复项
 
+# 禁止使用command-not-found功能，响应速度太慢
+unset command_not_found_handler
+
 # 引入zsh4humans
 . "$ZDOTDIR"/zshrc4h
 
