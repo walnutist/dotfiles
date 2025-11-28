@@ -81,7 +81,7 @@ command -v gls &> /dev/null && alias ls='gls --color=auto -A --group-directories
 {{ else if eq .chezmoi.os "linux" -}}
 alias ls='ls --color=auto --group-directories-first'
 {{ end }}
-alias l='ls -lh'
+alias l='ls -lah'
 alias ll='ls -lh'
 
 # 打印PATH
