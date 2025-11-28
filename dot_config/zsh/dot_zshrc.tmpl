@@ -34,15 +34,76 @@ setopt hist_ignore_dups         # 忽略连续重复命令
 setopt hist_ignore_space        # 忽略空格开头的命令
 setopt hist_find_no_dups        # 搜索时不显示重复项
 
+# 引入zsh4humans
 . "$ZDOTDIR"/zshrc4h
 
-z4h source   ohmyzsh/ohmyzsh/lib/directories.zsh
+# z4h source   ohmyzsh/ohmyzsh/lib/directories.zsh
 z4h load   ohmyzsh/ohmyzsh/plugins/sudo
 z4h load   ohmyzsh/ohmyzsh/plugins/extract
 z4h load   ohmyzsh/ohmyzsh/plugins/gitfast
 z4h load   ohmyzsh/ohmyzsh/plugins/rsync
 z4h load   ohmyzsh/ohmyzsh/plugins/cp
 z4h load   ohmyzsh/ohmyzsh/plugins/virtualenv
+
+{{ if eq .chezmoi.os "darwin" -}}
+z4h load   ohmyzsh/ohmyzsh/plugins/sublime
+z4h load   ohmyzsh/ohmyzsh/plugins/vscode
+export EDITOR='code --wait'
+e() {
+  code --wait "$@"
+}
+{{ else if eq .chezmoi.os "linux" -}}
+export EDITOR='nano'
+
+alias e="$EDITOR"
+{{ end }}
+
+# Aliases
+# 常用快捷
+alias -g ...='../..'
+alias -g ....='../../..'
+alias -g .....='../../../..'
+alias -g ......='../../../../..'
+
+alias -- -='cd -'
+alias 1='cd -1'
+alias 2='cd -2'
+alias 3='cd -3'
+alias 4='cd -4'
+alias 5='cd -5'
+alias 6='cd -6'
+alias 7='cd -7'
+alias 8='cd -8'
+alias 9='cd -9'
+
+{{ if eq .chezmoi.os "darwin" -}}
+command -v gls &> /dev/null && alias ls='gls --color=auto -A --group-directories-first' || alias ls='ls -A --color=auto'
+{{ else if eq .chezmoi.os "linux" -}}
+alias ls='ls --color=auto --group-directories-first'
+{{ end }}
+alias l='ls -lh'
+alias ll='ls -lh'
+
+# 打印PATH
+alias path='echo $PATH | tr -s ":" "\n"'
+
+# 危险操作
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias md='mkdir -p'
+alias rd='rmdir'
+
+# 常用git操作
+alias g='git'
+alias gs='git status -sb'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git pull'
+alias gd='git diff'
+alias gco='git checkout'
+alias gb='git branch'
 
 
 # LS_COLORS is used by GNU ls and Zsh completions. LSCOLORS is used by BSD ls.
