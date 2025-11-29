@@ -1,11 +1,11 @@
 {{ if eq .chezmoi.os "darwin" -}}
-    BREW_EXECUTABLE='{{ findExecutable "brew" (list "/opt/homebrew/bin" "/usr/local/bin") }}'
-    export HOMEBREW_NO_ENV_HINTS=1
-    export HOMEBREW_AUTO_UPDATE_SECS=604800
+BREW_EXECUTABLE='{{ findExecutable "brew" (list "/opt/homebrew/bin" "/usr/local/bin") }}'
+export HOMEBREW_NO_ENV_HINTS=1
+export HOMEBREW_AUTO_UPDATE_SECS=604800
 {{ else if eq .chezmoi.os "linux" -}}
-    BREW_EXECUTABLE='{{ findExecutable "brew" (list "/home/linuxbrew/.linuxbrew/bin" "~/.linuxbrew/bin") }}'
-    export HOMEBREW_NO_ENV_HINTS=1
-    export HOMEBREW_AUTO_UPDATE_SECS=604800
+BREW_EXECUTABLE='{{ findExecutable "brew" (list "/home/linuxbrew/.linuxbrew/bin" "~/.linuxbrew/bin") }}'
+export HOMEBREW_NO_ENV_HINTS=1
+export HOMEBREW_AUTO_UPDATE_SECS=604800
 {{ end }}
 [[ -x "$BREW_EXECUTABLE" ]] && eval "$(${BREW_EXECUTABLE} shellenv 2>/dev/null || true)"
 
