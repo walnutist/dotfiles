@@ -40,6 +40,9 @@ unset command_not_found_handler
 # 引入zsh4humans
 . "$ZDOTDIR"/zshrc4h
 
+# 引入~/.zshrc
+[[ -f "~/.zshrc" ]] && . "~/.zshrc"
+
 # z4h source   ohmyzsh/ohmyzsh/lib/directories.zsh
 z4h load   ohmyzsh/ohmyzsh/plugins/sudo
 z4h load   ohmyzsh/ohmyzsh/plugins/extract
