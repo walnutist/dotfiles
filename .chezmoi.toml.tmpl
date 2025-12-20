@@ -2,7 +2,7 @@
 {{- $securityLevel := promptChoice "What is the designated security level for this host?" $choices -}}
 
 [data]
-{{- if eq $securityLevel "critical" -}}
+{{ if eq $securityLevel "critical" -}}
     dircolorsPreset = "lava"
 {{- else if eq $securityLevel "essential" -}}
     dircolorsPreset = "dracula"
@@ -12,4 +12,4 @@
     dircolorsPreset = "nord"
 {{- else -}}
     dircolorsPreset = ""
-{{- end -}}
+{{- end }}
