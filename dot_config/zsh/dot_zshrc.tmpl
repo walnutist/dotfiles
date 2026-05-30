@@ -60,7 +60,7 @@ unset command_not_found_handler
 . "$ZDOTDIR"/zshrc4h
 
 # 引入~/.zshrc
-[[ -f ~/.zshrc ]] && . "~/.zshrc"
+[[ -f $HOME/.zshrc ]] && . $HOME/.zshrc
 
 # z4h source   ohmyzsh/ohmyzsh/lib/directories.zsh
 z4h load   ohmyzsh/ohmyzsh/plugins/sudo
