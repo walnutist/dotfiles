@@ -71,6 +71,62 @@ alias e="$EDITOR"
 {{ end }}
 
 # Aliases
+# 基础包名兼容
+alias fd="fdfind"
+alias bat="batcat"
+
+# du 磁盘占用
+alias du="dust"
+# df 磁盘挂载
+alias df="duf"
+
+# top 系统监控
+alias top="btm"
+
+# ping 可视化
+alias ping="gping"
+
+# git diff 美化
+alias diff="delta"
+
+# grep 高速搜索
+alias grep="rg"
+
+# 交互式 git 终端
+alias gitui="lazygit"
+alias lg="lazygit"
+
+# 全文搜索 rg 常用参数
+alias rgs="rg --smart-case"       # 智能大小写搜索
+alias rgh="rg --hidden"           # 包含隐藏文件搜索
+alias rgc="rg --color=always"     # 强制彩色输出
+
+# bat 增强阅读
+alias cat="bat"
+alias less="bat --paging=always"
+
+# fzf 文件快速打开
+vf() {
+  local file=$(fd | fzf --preview 'bat --color=always {}')
+  [[ -n "$file" ]] && vim "$file"
+}
+
+# fzf 切换目录
+cdf() {
+  local dir=$(fd -t d | fzf --preview 'eza --tree -L1 --icons {}')
+  [[ -n "$dir" ]] && cd "$dir"
+}
+
+# fzf 交互式杀进程
+killf() {
+  ps aux | fzf | awk '{print $2}' | xargs kill -9
+}
+
+# 交互式切换 git 分支
+gb() {
+  git checkout $(git branch | fzf | sed 's/^* //')
+}
+
 # 常用快捷
 alias -g ...='../..'
 alias -g ....='../../..'
@@ -91,7 +147,8 @@ alias 9='cd -9'
 {{ if eq .chezmoi.os "darwin" -}}
 command -v gls &> /dev/null && alias ls='gls --color=auto -A --group-directories-first' || alias ls='ls -A --color=auto'
 {{ else if eq .chezmoi.os "linux" -}}
-alias ls='ls --color=auto --group-directories-first'
+alias ls="eza --icons --group-directories-first"
+# alias ls='ls --color=auto --group-directories-first'
 {{ end }}
 alias l='ls -lah'
 alias ll='ls -lh'
