@@ -10,19 +10,6 @@ export HOMEBREW_AUTO_UPDATE_SECS=604800
 {{ end }}
 [[ -x "$BREW_EXECUTABLE" ]] && eval "$(${BREW_EXECUTABLE} shellenv 2>/dev/null || true)"
 
-# ASDF Java Home
-if command -v asdf > /dev/null && \
-   [[ -z "$JAVA_HOME" ]] && \
-   asdf plugin list | grep -q 'java' && \
-   asdf list java 2>/dev/null | grep -q -E '[a-zA-Z]+-[0-9]+\.[0-9]+\.[0-9]+'; then
-    
-    local java_home_script="$HOME/.asdf/plugins/java/set-java-home.zsh"
-    if [[ -f "$java_home_script" ]]; then
-        # echo "Found java home script at $java_home_script, sourcing it..."
-        source "$java_home_script"
-    fi
-fi
-
 # Mise-en-Place
 if command -v mise > /dev/null; then
     eval "$(mise activate zsh)"
