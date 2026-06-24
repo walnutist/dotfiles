@@ -197,6 +197,8 @@ elif [[ -f "$HOME/.dircolors.theme-$preset" ]]; then
     else
         export LS_COLORS="$(cat $HOME/.dircolors.theme-$preset | tr '\n' ':')" #从dircolors文件格式转为LS_COLORS格式
     fi
+elif [[ -f "$HOME/.lscolors.theme-$preset" ]]; then
+    export LS_COLORS="$(cat $HOME/.lscolors.theme-$preset)"
 elif [[ "" != "$preset" ]] && command -v vivid &> /dev/null; then
     export LS_COLORS="$(vivid generate $preset)";
 fi
