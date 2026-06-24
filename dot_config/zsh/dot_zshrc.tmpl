@@ -1,3 +1,32 @@
+# Locales
+export LANG=en_US.UTF-8
+export LC_COLLATE=zh_CN.UTF-8
+
+# Homebrew mirrors
+export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/brew.git"
+export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/homebrew-core.git"
+export HOMEBREW_API_DOMAIN="https://mirrors.tuna.tsinghua.edu.cn/homebrew-bottles/api"
+export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.tuna.tsinghua.edu.cn/homebrew-bottles"
+
+# Rustup mirrors
+export RUSTUP_DIST_SERVER="https://mirrors.tuna.tsinghua.edu.cn/rustup"
+export RUSTUP_UPDATE_ROOT="https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup"
+
+# UV index mirrors
+export UV_INDEX_URL="https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
+
+# Pip index mirrors
+export PIP_TRUSTED_HOST="mirrors.tuna.tsinghua.edu.cn"
+export PIP_INDEX_URL="https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
+
+# Go mirrors
+export GO111MODULE=on
+export GOPROXY="https://goproxy.cn,direct"
+export GOSUMDB="sum.golang.google.cn"
+
+# Hugging-Face mirrors
+export HF_ENDPOINT="https://hf-mirror.com"
+
 # Homebrew
 {{ if eq .chezmoi.os "darwin" -}}
 BREW_EXECUTABLE='{{ findExecutable "brew" (list "/opt/homebrew/bin" "/usr/local/bin") }}'
