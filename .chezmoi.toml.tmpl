@@ -13,3 +13,5 @@
 {{- else -}}
     dircolorsPreset = ""
 {{- end }}
+
+{{ include (printf "platform/%s/chezmoidata.toml" .chezmoi.os) }}
