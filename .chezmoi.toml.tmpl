@@ -1,7 +1,17 @@
+{{- $osid := .chezmoi.os -}}
+{{- if eq .chezmoi.os "linux" -}}
+  {{- if hasKey .chezmoi.osRelease "id" -}}
+    {{- $osid = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
+  {{- else -}}
+    {{- $osid = "linux-unknown" -}}
+  {{- end -}}
+{{- end -}}
+
 {{- $choices := list "critical" "essential" "standard" "sandbox" "none" -}}
 {{- $securityLevel := promptChoice "What is the designated security level for this host?" $choices -}}
 
 [data]
+osid = "{{ $osid }}"
 {{ if eq $securityLevel "critical" -}}
     dircolorsPreset = "lava"
 {{- else if eq $securityLevel "essential" -}}
@@ -14,4 +24,12 @@
     dircolorsPreset = ""
 {{- end }}
 
-{{ include (printf "platform/%s/chezmoidata.toml" .chezmoi.os) }}
+{{- $path := printf "platform/%s/chezmoidata.toml" $osid -}}
+{{- if (stat $path) -}}
+    {{ include $path }}
+{{- else if eq .chezmoi.os "linux" -}}
+    {{- $fallback := "platform/linux/chezmoidata.toml" -}}
+    {{- if (stat $fallback) -}}
+        {{ include $fallback }}
+    {{- end -}}
+{{- end -}}
