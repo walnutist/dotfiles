@@ -193,6 +193,40 @@ alias gl='git pull'
 alias gd='git diff'
 alias gco='git checkout'
 
+# =============================================================================
+# Modular profiles (base + platform + profile)
+# 在所有 alias / dircolors 设置完毕之后、引入 ~/.zshrc 之前追加
+# =============================================================================
+
+# --- 1. base (5 profile 共享基类) ---
+[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/base.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/base.zsh
+
+# --- 2. platform (OS 维度) ---
+{{- if eq .chezmoi.os "darwin" }}
+[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/platforms/darwin.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/platforms/darwin.zsh
+{{- else if eq .chezmoi.os "linux" }}
+  {{- if eq .chezmoi.osRelease.id "debian" }}
+[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/platforms/debian.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/platforms/debian.zsh
+  {{- else if eq .chezmoi.osRelease.id "fedora" }}
+[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/platforms/fedora.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/platforms/fedora.zsh
+  {{- end }}
+{{- else if eq .chezmoi.os "windows" }}
+[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/platforms/windows.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/platforms/windows.zsh
+{{- end }}
+
+# --- 3. profile (5 选 1,用户 init 时选) ---
+{{- $p := .profile | default "desktop" }}
+{{- if eq $p "server-homelab" }}[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/profiles/server-homelab.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/profiles/server-homelab.zsh
+{{- end -}}
+{{- if eq $p "server-linode"  }}[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/profiles/server-linode.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/profiles/server-linode.zsh
+{{- end -}}
+{{- if eq $p "vm-homelab"     }}[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/profiles/vm-homelab.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/profiles/vm-homelab.zsh
+{{- end -}}
+{{- if eq $p "lxc-homelab"    }}[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/profiles/lxc-homelab.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/profiles/lxc-homelab.zsh
+{{- end -}}
+{{- if eq $p "desktop"        }}[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/profiles/desktop.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/profiles/desktop.zsh
+{{- end -}}
+
 # Define functions and completions.
 function md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
 compdef _directories md
