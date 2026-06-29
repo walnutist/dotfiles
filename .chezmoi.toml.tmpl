@@ -1,3 +1,12 @@
+# =============================================================================
+# .chezmoi.toml.tmpl — chezmoi 配置 + 首次初始化交互
+#
+# 第一次 `chezmoi init` 时会向用户问 3 个问题,答案写入:
+#   ~/.config/chezmoi/chezmoi.toml  的 [data] section
+# 之后所有 `chezmoi apply` 不再问(除非这个模板改了)。
+# =============================================================================
+
+# --- OS 检测 ---
 {{- $osid := .chezmoi.os -}}
 {{- if eq .chezmoi.os "linux" -}}
   {{- if hasKey .chezmoi.osRelease "id" -}}
@@ -7,29 +16,36 @@
   {{- end -}}
 {{- end -}}
 
-{{- $choices := list "critical" "essential" "standard" "sandbox" "none" -}}
-{{- $securityLevel := promptChoice "What is the designated security level for this host?" $choices -}}
+# --- Profile 选择 (5 选 1) ---
+profile = {{ promptChoice "profile" "这台机器的角色?" ( list
+    ( list "server-homelab"  "HomeLab 裸金属 — 物理服务器 (Debian/Fedora)" )
+    ( list "server-linode"   "云 VPS — 公网暴露的服务器" )
+    ( list "vm-homelab"      "HomeLab VM — HomeLab 内的虚拟机" )
+    ( list "lxc-homelab"     "HomeLab LXC — HomeLab 内的 Linux 容器(精简)" )
+    ( list "desktop"         "Desktop — 个人电脑 (macOS/Windows/Linux)" )
+) "desktop" }}
+
+# --- 跨 profile 共享的 user data ---
+github_user = {{ promptString "github_user" "GitHub 用户名" "walnutist" }}
+email       = {{ promptString "email"       "Git 提交邮箱" "me@home.org" }}
+
+# --- dircolors 预设 (从原 master 保留) ---
+securityLevel = {{ promptChoice "securityLevel" "安全 / dircolors 级别?" ( list
+    ( list "critical" "Critical — lava 配色" )
+    ( list "essential" "Essential — dracula 配色" )
+    ( list "standard"  "Standard — tokyonight-night 配色" )
+    ( list "sandbox"   "Sandbox — nord 配色" )
+    ( list "none"      "None — 不设 dircolors" )
+) "standard" }}
 
 [data]
 osid = "{{ $osid }}"
-{{ if eq $securityLevel "critical" -}}
-    dircolorsPreset = "lava"
-{{- else if eq $securityLevel "essential" -}}
-    dircolorsPreset = "dracula"
-{{- else if eq $securityLevel "standard" -}}
-    dircolorsPreset = "tokyonight-night"
-{{- else if eq $securityLevel "sandbox" -}}
-    dircolorsPreset = "nord"
-{{- else -}}
-    dircolorsPreset = ""
+{{- if eq .securityLevel "critical" }}
+dircolorsPreset = "lava"
+{{- else if eq .securityLevel "essential" }}
+dircolorsPreset = "dracula"
+{{- else if eq .securityLevel "standard" }}
+dircolorsPreset = "tokyonight-night"
+{{- else if eq .securityLevel "sandbox" }}
+dircolorsPreset = "nord"
 {{- end }}
-
-{{- $path := printf "platform/%s/chezmoidata.toml" $osid -}}
-{{- if (stat $path) -}}
-    {{ include $path }}
-{{- else if eq .chezmoi.os "linux" -}}
-    {{- $fallback := "platform/linux/chezmoidata.toml" -}}
-    {{- if (stat $fallback) -}}
-        {{ include $fallback }}
-    {{- end -}}
-{{- end -}}
