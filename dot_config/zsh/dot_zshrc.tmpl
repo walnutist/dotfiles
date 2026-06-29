@@ -37,9 +37,6 @@ z4h bindkey z4h-cd-forward  Shift+Right  # cd into the next directory
 z4h bindkey z4h-cd-up       Shift+Up     # cd into the parent directory
 z4h bindkey z4h-cd-down     Shift+Down   # cd into a child directory
 
-# Define named directories: ~w <=> Windows home directory on WSL.
-[[ -z $z4h_win_home ]] || hash -d w=$z4h_win_home
-
 # Set shell options: http://zsh.sourceforge.net/Doc/Release/Options.html.
 # 基础体验
 setopt glob_dots                # 通配符使用包含隐藏文件
@@ -68,11 +65,13 @@ export GPG_TTY=$TTY
 # Locales
 export LANG=en_US.UTF-8
 export LC_COLLATE=zh_CN.UTF-8
-# Homebrew mirrors
-export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.ustc.edu.cn/brew.git"
-export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.ustc.edu.cn/homebrew-core.git"
-export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles"
-export HOMEBREW_API_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles/api"
+# Homebrew mirrors (darwin only)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.ustc.edu.cn/brew.git"
+    export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.ustc.edu.cn/homebrew-core.git"
+    export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles"
+    export HOMEBREW_API_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles/api"
+fi
 # Rustup mirrors
 export RUSTUP_DIST_SERVER="https://mirrors.ustc.edu.cn/rust-static"
 export RUSTUP_UPDATE_ROOT="https://mirrors.ustc.edu.cn/rust-static/rustup"
@@ -88,11 +87,12 @@ export GOSUMDB="sum.golang.google.cn"
 # Hugging-Face mirrors
 export HF_ENDPOINT="https://hf-mirror.com"
 
-# Homebrew
-BREW_EXECUTABLE='{{ findExecutable "brew" (list "/home/linuxbrew/.linuxbrew/bin" "~/.linuxbrew/bin") }}'
-export HOMEBREW_NO_ENV_HINTS=1
-export HOMEBREW_AUTO_UPDATE_SECS=604800
-[[ -x "$BREW_EXECUTABLE" ]] && eval "$(${BREW_EXECUTABLE} shellenv 2>/dev/null || true)"
+# Homebrew (darwin only)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    export HOMEBREW_NO_ENV_HINTS=1
+    export HOMEBREW_AUTO_UPDATE_SECS=604800
+    eval "$(/usr/local/bin/brew shellenv 2>/dev/null || /opt/homebrew/bin/brew shellenv 2>/dev/null || true)"
+fi
 
 # Mise-en-Place
 if command -v mise > /dev/null; then

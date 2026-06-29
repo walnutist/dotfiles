@@ -1,6 +1,9 @@
 # =============================================================================
 # platforms/windows.zsh — Windows 平台差量 (Git Bash / WSL)
 # =============================================================================
+、
+# Define named directories: ~w <=> Windows home directory on WSL.
+[[ -z $z4h_win_home ]] || hash -d w=$z4h_win_home
 
 # Editor (Windows 特有: VS Code)
 z4h load   ohmyzsh/ohmyzsh/plugins/vscode 2>/dev/null || true
