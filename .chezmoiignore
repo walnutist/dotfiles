@@ -1,2 +1,42 @@
+# =============================================================================
+# .chezmoiignore — 平台 + profile 级别的文件级过滤
+# chezmoi 文档: Patterns are template-evaluated. 负向匹配用 !pattern。
+# =============================================================================
+
+# 元数据不入 home
 README.md
 platform/
+
+# ============================================================
+# Profile 过滤 (dot_config/zsh/profiles/ 下的 5 个文件)
+# ============================================================
+{{- $p := default "desktop" .profile }}
+{{- if ne $p "server-homelab" }}dot_config/zsh/profiles/server-homelab.zsh
+{{- end -}}
+{{- if ne $p "server-linode"  }}dot_config/zsh/profiles/server-linode.zsh
+{{- end -}}
+{{- if ne $p "vm-homelab"     }}dot_config/zsh/profiles/vm-homelab.zsh
+{{- end -}}
+{{- if ne $p "lxc-homelab"    }}dot_config/zsh/profiles/lxc-homelab.zsh
+{{- end -}}
+{{- if ne $p "desktop"        }}dot_config/zsh/profiles/desktop.zsh
+{{- end -}}
+
+# ============================================================
+# Platform 过滤 (dot_config/zsh/platforms/ 下的 4 个文件)
+# ============================================================
+{{- if ne .chezmoi.os "darwin" }}
+dot_config/zsh/platforms/darwin.zsh
+{{- end }}
+
+{{- if not (and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "debian")) }}
+dot_config/zsh/platforms/debian.zsh
+{{- end }}
+
+{{- if not (and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "fedora")) }}
+dot_config/zsh/platforms/fedora.zsh
+{{- end }}
+
+{{- if ne .chezmoi.os "windows" }}
+dot_config/zsh/platforms/windows.zsh
+{{- end }}
