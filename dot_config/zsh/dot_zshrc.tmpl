@@ -1,3 +1,28 @@
+function platform() {
+    local phase="$1"
+    local func_name="platform_${phase}"
+    if typeset -f "$func_name" >/dev/null 2>&1; then
+        "$func_name"
+    else
+        echo "Warning: $func_name not defined for current platform {{ .osid }}"
+    fi
+}
+
+function profile() {
+    local phase="$1"
+    local func_name="profile_${phase}"
+    if typeset -f "$func_name" >/dev/null 2>&1; then
+        "$func_name"
+    else
+        echo "Warning: $func_name not defined for current profile {{ .local_profile }}"
+    fi
+}
+
+# Platform
+[[ -r "${ZSH_CONFIG_DIR}/platforms/{{ .osid }}.zsh" ]] && source "${ZSH_CONFIG_DIR}/platforms/{{ .osid }}.zsh"
+# Profile
+[[ -r "${ZSH_CONFIG_DIR}/profiles/{{ .local_profile }}.zsh" ]] && source "${ZSH_CONFIG_DIR}/profiles/{{ .local_profile }}.zsh"
+
 ###### Phase 1: Initialize z4h ######
 zstyle ':z4h:' auto-update      'no'
 zstyle ':z4h:' auto-update-days '28'
@@ -171,18 +196,7 @@ alias gl='git pull'
 alias gd='git diff'
 alias gco='git checkout'
 
-# =============================================================================
-# Modular profiles (base + platform + profile)
-# 在所有 alias / dircolors 设置完毕之后、引入 ~/.zshrc 之前追加
-# =============================================================================
-
-# Platform
-[[ -r "${ZSH_CONFIG_DIR}/platforms/{{ .osid }}.zsh" ]] && source "${ZSH_CONFIG_DIR}/platforms/{{ .osid }}.zsh"
-
-# Profile
-[[ -r "${ZSH_CONFIG_DIR}/profiles/{{ .local_profile }}.zsh" ]] && source "${ZSH_CONFIG_DIR}/profiles/{{ .local_profile }}.zsh"
-
-# Define functions and completions.
+# Define functions.
 function md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
 compdef _directories md
 # fzf 文件快速打开

@@ -22,3 +22,41 @@ export HOMEBREW_AUTO_UPDATE_SECS=604800
 # macOS 没装 coreutils 时禁用 GNU 工具的 fallback
 # (master 已有 gls alias,这部分由 master 处理)
 command -v gls &> /dev/null && alias ls='gls --color=auto -A --group-directories-first' || alias ls='ls -A --color=auto'
+
+
+
+function platform_initialize() {
+
+}
+
+function platform_prepare_env() {
+
+}
+
+function platform_load_plugins() {
+
+}
+
+function platform_bind_keys() {
+
+}
+
+function platform_setup_options() {
+
+}
+
+function platform_setup_toolchains() {
+
+}
+
+function platform_setup_aliases() {
+
+}
+
+function platform_setup_functions() {
+
+}
+
+function platform_finalize() {
+
+}
