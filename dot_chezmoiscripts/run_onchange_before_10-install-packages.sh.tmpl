@@ -1,0 +1,225 @@
+#!/bin/bash
+# =============================================================================
+# run_onchange_before_10-install-packages.sh
+# 在 apply dotfiles 之前跑 (run_onchange_ 前缀),内容变了才重装。
+# 前缀 10 = 顺序号 (小为先)。
+#
+# 装的是 master 已经在用的核心工具集 + profile 专用工具
+# (镜像源已在 master dot_zshrc.tmpl 中设置 HOMEBREW_BREW_GIT_REMOTE 等)
+# =============================================================================
+set -euo pipefail
+
+{{- $p := .profile | default "desktop" }}
+
+log() { echo -e "\033[1;36m[install-packages]\033[0m $*"; }
+die() { echo -e "\033[1;31m[install-packages]\033[0m $*" >&2; exit 1; }
+
+# =============================================================================
+# macOS — Homebrew
+# =============================================================================
+{{- if eq .chezmoi.os "darwin" }}
+command -v brew >/dev/null 2>&1 || die "Homebrew 未安装,请先运行: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+
+log "brew update"
+brew update
+
+# 基础工具 (所有 profile) — master dot_zshrc.tmpl 用的工具集
+log "brew install 基础工具"
+brew install \
+    fd \
+    bat \
+    ripgrep \
+    fzf \
+    zoxide \
+    jq \
+    eza \
+    lazygit \
+    git-delta \
+    vivid \
+    dircolors
+
+{{-   if eq $p "server-homelab" -}}
+log "brew install server-homelab 专用"
+brew install htop tmux neovim rsync lm-sensors smartmontools cifs-utils
+{{-   end -}}
+
+{{-   if eq $p "server-linode" -}}
+log "brew install server-linode 专用"
+brew install htop tmux neovim rsync fail2ban
+{{-   end -}}
+
+{{-   if eq $p "vm-homelab" -}}
+log "brew install vm-homelab 专用"
+brew install htop tmux neovim kubectl helm kind iperf3
+{{-   end -}}
+
+{{-   if eq $p "lxc-homelab" -}}
+log "brew install lxc-homelab 专用(极简)"
+brew install htop
+{{-   end -}}
+
+{{-   if eq $p "desktop" -}}
+log "brew install desktop 专用"
+brew install neovim starship
+brew install --cask raycast 2>/dev/null || true
+{{-   end -}}
+{{- end }}
+
+# =============================================================================
+# Debian / Ubuntu — apt
+# =============================================================================
+{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "debian") }}
+command -v apt-get >/dev/null || die "apt 不可用"
+
+log "apt update"
+sudo apt-get update
+
+# 基础工具 (所有 profile)
+log "apt install 基础工具"
+sudo apt-get install -y --no-install-recommends \
+    fd-find \
+    bat \
+    ripgrep \
+    fzf \
+    zoxide \
+    jq \
+    tmux \
+    htop \
+    rsync \
+    git-delta \
+    eza
+
+{{-   if eq $p "server-homelab" -}}
+log "apt install server-homelab 专用"
+sudo apt-get install -y --no-install-recommends \
+    neovim \
+    lm-sensors \
+    smartmontools \
+    cifs-utils \
+    nfs-common
+{{-   end -}}
+
+{{-   if eq $p "server-linode" -}}
+log "apt install server-linode 专用"
+sudo apt-get install -y --no-install-recommends \
+    neovim \
+    fail2ban \
+    ufw \
+    chrony \
+    unattended-upgrades
+sudo systemctl enable --now fail2ban
+sudo ufw allow OpenSSH
+echo "y" | sudo ufw enable
+{{-   end -}}
+
+{{-   if eq $p "vm-homelab" -}}
+log "apt install vm-homelab 专用"
+sudo apt-get install -y --no-install-recommends \
+    neovim \
+    iperf3 \
+    curl \
+    ca-certificates
+# docker / kubectl 由用户单独装(避免锁定 docker-ce vs docker.io)
+{{-   end -}}
+
+{{-   if eq $p "lxc-homelab" -}}
+log "apt install lxc-homelab 专用(极简,不装额外包)"
+# 故意只保留 base 装的 htop + rsync
+{{-   end -}}
+
+{{-   if eq $p "desktop" -}}
+log "apt install desktop 专用"
+sudo apt-get install -y --no-install-recommends \
+    neovim \
+    xdg-utils
+{{-   end -}}
+{{- end }}
+
+# =============================================================================
+# Fedora / RHEL — dnf
+# =============================================================================
+{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "fedora") }}
+command -v dnf >/dev/null || die "dnf 不可用"
+
+log "dnf groupinstall development tools (必要)"
+sudo dnf groupinstall -y "Development Tools" 2>/dev/null || true
+
+# 基础工具
+log "dnf install 基础工具"
+sudo dnf install -y \
+    fd-find \
+    bat \
+    ripgrep \
+    fzf \
+    zoxide \
+    jq \
+    tmux \
+    htop \
+    rsync \
+    git-delta \
+    eza \
+    gcc \
+    make \
+    git \
+    curl \
+    wget
+
+{{-   if eq $p "server-homelab" -}}
+log "dnf install server-homelab 专用"
+sudo dnf install -y \
+    neovim \
+    lm_sensors \
+    smartmontools \
+    cifs-utils \
+    nfs-utils
+{{-   end -}}
+
+{{-   if eq $p "server-linode" -}}
+log "dnf install server-linode 专用"
+sudo dnf install -y \
+    neovim \
+    fail2ban \
+    firewalld \
+    chrony \
+    dnf-automatic
+sudo systemctl enable --now fail2ban firewalld
+sudo firewall-cmd --permanent --add-service=ssh
+sudo firewall-cmd --reload
+{{-   end -}}
+
+{{-   if eq $p "vm-homelab" -}}
+log "dnf install vm-homelab 专用"
+sudo dnf install -y \
+    neovim \
+    iperf3
+{{-   end -}}
+
+{{-   if eq $p "lxc-homelab" -}}
+log "dnf install lxc-homelab 专用(极简,不装额外包)"
+{{-   end -}}
+
+{{-   if eq $p "desktop" -}}
+log "dnf install desktop 专用"
+sudo dnf install -y \
+    neovim \
+    xdg-utils
+{{-   end -}}
+{{- end }}
+
+# =============================================================================
+# Windows — winget (desktop only)
+# =============================================================================
+{{- if eq .chezmoi.os "windows" }}
+command -v winget >/dev/null 2>&1 || log "winget 不可用,跳过"
+
+{{-   if eq $p "desktop" -}}
+log "winget install desktop 工具"
+winget install --id Neovim.Neovim -e
+winget install --id sharkdp.fd -e
+winget install --id sharkdp.bat -e
+winget install --id BurntSushi.ripgrep.MSVC -e
+winget install --id junegunn.fzf -e
+{{-   end -}}
+{{- end }}
+
+log "包安装完成"
