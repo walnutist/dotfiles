@@ -2,6 +2,13 @@
 # platforms/windows.zsh — Windows 平台差量 (Git Bash / WSL)
 # =============================================================================
 
+# Editor (Windows 特有: VS Code)
+z4h load   ohmyzsh/ohmyzsh/plugins/vscode 2>/dev/null || true
+export EDITOR='code --wait'
+e() {
+  code --wait "$@"
+}
+
 # 路径转换
 alias pwdw='cygpath -w $(pwd)'                       # 当前目录转 Windows 路径
 alias w2u='cygpath -u'                               # Windows 路径转 Unix

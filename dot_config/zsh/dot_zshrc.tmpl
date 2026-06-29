@@ -25,17 +25,8 @@ z4h load   ohmyzsh/ohmyzsh/plugins/rsync
 z4h load   ohmyzsh/ohmyzsh/plugins/cp
 z4h load   ohmyzsh/ohmyzsh/plugins/virtualenv
 # z4h source   ohmyzsh/ohmyzsh/lib/directories.zsh
-{{ if eq .chezmoi.os "darwin" -}}
-# z4h load   ohmyzsh/ohmyzsh/plugins/sublime
-z4h load   ohmyzsh/ohmyzsh/plugins/vscode
-export EDITOR='code --wait'
-e() {
-  code --wait "$@"
-}
-{{ else if eq .chezmoi.os "linux" -}}
 export EDITOR='nano'
 alias e="$EDITOR"
-{{ end }}
 
 # zsh4humans key bindings
 z4h bindkey undo            Ctrl+/       # undo the last command line change
@@ -98,15 +89,9 @@ export GOSUMDB="sum.golang.google.cn"
 export HF_ENDPOINT="https://hf-mirror.com"
 
 # Homebrew
-{{ if eq .chezmoi.os "darwin" -}}
-BREW_EXECUTABLE='{{ findExecutable "brew" (list "/opt/homebrew/bin" "/usr/local/bin") }}'
-export HOMEBREW_NO_ENV_HINTS=1
-export HOMEBREW_AUTO_UPDATE_SECS=604800
-{{ else if eq .chezmoi.os "linux" -}}
 BREW_EXECUTABLE='{{ findExecutable "brew" (list "/home/linuxbrew/.linuxbrew/bin" "~/.linuxbrew/bin") }}'
 export HOMEBREW_NO_ENV_HINTS=1
 export HOMEBREW_AUTO_UPDATE_SECS=604800
-{{ end }}
 [[ -x "$BREW_EXECUTABLE" ]] && eval "$(${BREW_EXECUTABLE} shellenv 2>/dev/null || true)"
 
 # Mise-en-Place
@@ -164,12 +149,8 @@ alias 7='cd -7'
 alias 8='cd -8'
 alias 9='cd -9'
 
-{{ if eq .chezmoi.os "darwin" -}}
-command -v gls &> /dev/null && alias ls='gls --color=auto -A --group-directories-first' || alias ls='ls -A --color=auto'
-{{ else if eq .chezmoi.os "linux" -}}
 alias ls="eza --icons --group-directories-first"
 # alias ls='ls --color=auto --group-directories-first'
-{{ end }}
 alias l='ls -lah'
 alias ll='ls -lh'
 
@@ -198,34 +179,11 @@ alias gco='git checkout'
 # 在所有 alias / dircolors 设置完毕之后、引入 ~/.zshrc 之前追加
 # =============================================================================
 
-# --- 1. base (5 profile 共享基类) ---
-[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/base.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/base.zsh
+# Platform
+[[ -r "${ZSH_CONFIG_DIR}/platforms/{{ .osid }}.zsh" ]] && source "${ZSH_CONFIG_DIR}/platforms/{{ .osid }}.zsh"
 
-# --- 2. platform (OS 维度) ---
-{{- if eq .chezmoi.os "darwin" }}
-[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/platforms/darwin.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/platforms/darwin.zsh
-{{- else if eq .chezmoi.os "linux" }}
-  {{- if eq .chezmoi.osRelease.id "debian" }}
-[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/platforms/debian.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/platforms/debian.zsh
-  {{- else if eq .chezmoi.osRelease.id "fedora" }}
-[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/platforms/fedora.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/platforms/fedora.zsh
-  {{- end }}
-{{- else if eq .chezmoi.os "windows" }}
-[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/platforms/windows.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/platforms/windows.zsh
-{{- end }}
-
-# --- 3. profile (5 选 1,用户 init 时选) ---
-{{- $p := .profile | default "desktop" }}
-{{- if eq $p "server-homelab" }}[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/profiles/server-homelab.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/profiles/server-homelab.zsh
-{{- end -}}
-{{- if eq $p "server-linode"  }}[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/profiles/server-linode.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/profiles/server-linode.zsh
-{{- end -}}
-{{- if eq $p "vm-homelab"     }}[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/profiles/vm-homelab.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/profiles/vm-homelab.zsh
-{{- end -}}
-{{- if eq $p "lxc-homelab"    }}[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/profiles/lxc-homelab.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/profiles/lxc-homelab.zsh
-{{- end -}}
-{{- if eq $p "desktop"        }}[[ -r ${ZDOTDIR:-$HOME}/.config/zsh/profiles/desktop.zsh ]] && source ${ZDOTDIR:-$HOME}/.config/zsh/profiles/desktop.zsh
-{{- end -}}
+# Profile
+[[ -r "${ZSH_CONFIG_DIR}/profiles/{{ .local_profile }}.zsh" ]] && source "${ZSH_CONFIG_DIR}/profiles/{{ .local_profile }}.zsh"
 
 # Define functions and completions.
 function md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
