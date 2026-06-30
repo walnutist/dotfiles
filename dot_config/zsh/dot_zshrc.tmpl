@@ -236,8 +236,8 @@ __phase_hook() {
     if typeset -f "$func_name" >/dev/null 2>&1; then
         "$func_name"
     else
-        echo "ERROR: Function '$func_name' is not defined." >&2
-        exit 1
+        echo "WARNING: Function '$func_name' is not defined." >&2
+        echo "Skipping..." >&2
     fi
 }
 
