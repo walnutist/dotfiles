@@ -232,7 +232,7 @@ phase_finalize() {
 # 按阶段执行：主 phase → platform 钩子 → profile 钩子
 __phase_hook() {
     local phase="$1"
-    local func_name="${2}_${phase}"
+    local func_name="${phase}_${2}"
     if typeset -f "$func_name" >/dev/null 2>&1; then
         "$func_name"
     else
