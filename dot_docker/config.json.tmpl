@@ -1,0 +1,13 @@
+{
+	{{- if eq .chezmoi.os "darwin" }}
+	"credsStore": "osxkeychain",
+	{{- if findExecutable "orb" (list "~/.local/bin" "~/bin" "/usr/local/bin" "/usr/bin") }}
+	"currentContext": "orbstack",
+	{{- end }}
+	{{ elif eq .chezmoi.os "linux"}}
+	"credsStore": "pass",
+	{{ elif eq .chezmoi.os "windows"}}
+	"credsStore": "wincred",
+	{{- end }}
+	"__comments__": "Docker client settings generated via chezmoi"
+}

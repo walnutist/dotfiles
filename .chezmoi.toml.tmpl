@@ -18,7 +18,7 @@
 {{- $profile_choice := promptChoice "Profile for this machine?" $profile_keys -}}
 
 [data]
-osid = "{{ $osid }}"
+osid = {{ $osid | quote }}
 {{- range $key, $val := $profiles }}
 [data.profiles.{{ $key }}]
   {{- range $k, $v := $val }}
@@ -27,7 +27,7 @@ osid = "{{ $osid }}"
 {{- end }}
 
 [data.local_profile]
-name = "{{ $profile_choice }}"
+name = {{ $profile_choice | quote }}
 {{- range $key, $val := index $profiles $profile_choice }}
 {{ $key }} = {{ $val | quote }}
 {{- end }}

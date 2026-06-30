@@ -4,7 +4,17 @@
 # =============================================================================
 
 # --- 阶段 2: 工具可用性检查 (fd / bat) ---
-platform_prepare_env() { :; }
+platform_prepare_env() {
+    export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.ustc.edu.cn/brew.git"
+    export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.ustc.edu.cn/homebrew-core.git"
+    export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles"
+    export HOMEBREW_API_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles/api"
+    export HOMEBREW_NO_ENV_HINTS=1
+    export HOMEBREW_AUTO_UPDATE_SECS=604800
+
+    command -v subl &> /dev/null && export EDITOR='subl --wait'
+    export EDITOR='nano'
+}
 platform_initialize() { :; }
 platform_load_plugins() { :; }
 platform_bind_keys() { :; }
@@ -13,6 +23,8 @@ platform_setup_toolchains() {
     command -v fdfind &> /dev/null && alias fd='fdfind' || true
     command -v batcat &> /dev/null && alias bat='batcat' || true
 }
-platform_setup_aliases() { :; }
+platform_setup_aliases() {
+    alias e="nano"
+}
 platform_setup_functions() { :; }
 platform_finalize() { :; }

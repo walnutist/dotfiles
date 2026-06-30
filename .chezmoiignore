@@ -3,3 +3,5 @@ README.md
 !.config/zsh/profiles/{{ .local_profile.name }}.zsh
 .config/zsh/platforms/*
 !.config/zsh/platforms/{{ .osid }}.zsh
+.config/preferences/*
+!.config/preferences/{{ .osid }}/*
