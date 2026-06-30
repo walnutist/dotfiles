@@ -50,18 +50,14 @@ phase_prepare_env() {
     export GOSUMDB="sum.golang.google.cn"
     export HF_ENDPOINT="https://hf-mirror.com"
 
+    local lscolors_preset="{{ .local_profile.lscolors_theme }}"
     # dircolors / LS_COLORS 配置
-    local preset="{{ .local_profile.dircolor_preset }}"
-    if [[ -f "$HOME/.lscolors.theme-$preset" ]]; then
-        export LS_COLORS="$(cat $HOME/.lscolors.theme-$preset)"
-    elif [[ -f "$HOME/.dircolors.theme-$preset" ]]; then
-        command -v dircolors &> /dev/null && eval "$(dircolors $HOME/.dircolors.theme-$preset)" || \
-            export LS_COLORS="$(cat $HOME/.dircolors.theme-$preset | tr '\n' ':')"
-    elif [[ -f "$HOME/.dircolors" ]]; then
-        command -v dircolors &> /dev/null && eval "$(dircolors $HOME/.dircolors)" || \
-            export LS_COLORS="$(cat $HOME/.dircolors | tr '\n' ':')"
-    elif [[ "" != "$preset" ]] && command -v vivid &> /dev/null; then
-        export LS_COLORS="$(vivid generate $preset)"
+    if [[ -f "$ZDOTDIR/lscolors/theme-$lscolors_preset" ]]; then
+        export LS_COLORS="$(<$ZDOTDIR/lscolors/theme-$lscolors_preset)"
+    elif [[ "" != "$lscolors_preset" ]] && command -v vivid &> /dev/null; then
+        export LS_COLORS="$(vivid generate $lscolors_preset)";
+    elif [[ -f "$ZDOTDIR/.lscolors.default" ]]; then
+        export LS_COLORS="$(<$ZDOTDIR/.lscolors.default)"
     fi
 }
 
@@ -143,9 +139,7 @@ phase_setup_aliases() {
     command -v rg &> /dev/null && alias rgc="rg --color=always"     # 强制彩色输出
     command -v bat &> /dev/null && alias cat="bat"                  # bat 增强阅读
     command -v bat &> /dev/null && alias less="bat --paging=always"
-    command -v lazygit &> /dev/null && alias gitui="lazygit"        # 交互式 git 终端
-    command -v lazygit &> /dev/null && alias lg="lazygit"
-    command -v eza &> /dev/null && alias ls="eza"                   # ls
+    command -v eza &> /dev/null && alias ls="eza --icons --group-directories-first"                   # ls
 
 
     # 快捷路径 (.., ..., ...., .....)
@@ -165,7 +159,7 @@ phase_setup_aliases() {
     alias 9='cd -9'
 
     # 文件浏览
-    alias ls="ls --group-directories-first"
+    # alias ls="ls --group-directories-first"
     alias l='ls -lah'
     alias ll='ls -lh'
     alias path='echo $PATH | tr -s ":" "\n"'
@@ -186,18 +180,20 @@ phase_setup_aliases() {
     alias gl='git pull'
     alias gd='git diff'
     alias gco='git checkout'
+    command -v lazygit &> /dev/null && alias gitui="lazygit"        # 交互式 git 终端
+    command -v lazygit &> /dev/null && alias lg="lazygit"
 }
 
 # --- 阶段 8: 自定义函数 ---
 phase_setup_functions() {
     # md: 创建目录并跳转 (带补全)
-    function md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
+    md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
     compdef _directories md
 
     # vf: fzf 文件快速打开
     vf() {
       local file=$(fd | fzf --preview 'bat --color=always {}')
-      [[ -n "$file" ]] && vim "$file"
+      [[ -n "$file" ]] && open "$file"
     }
 
     # cdf: fzf 切换目录
@@ -231,7 +227,7 @@ phase_finalize() {
 
 # 加载 platform / profile 脚本（只定义函数，不执行）
 [[ -r "${ZSH_CONFIG_DIR}/platforms/{{ .osid }}.zsh" ]] && source "${ZSH_CONFIG_DIR}/platforms/{{ .osid }}.zsh"
-[[ -r "${ZSH_CONFIG_DIR}/profiles/{{ .local_profile }}.zsh" ]] && source "${ZSH_CONFIG_DIR}/profiles/{{ .local_profile }}.zsh"
+[[ -r "${ZSH_CONFIG_DIR}/profiles/{{ .local_profile.name }}.zsh" ]] && source "${ZSH_CONFIG_DIR}/profiles/{{ .local_profile.name }}.zsh"
 
 # 按阶段执行：主 phase → platform 钩子 → profile 钩子
 __phase_hook() {
@@ -242,7 +238,17 @@ __phase_hook() {
     fi
 }
 
-for _current in initialize prepare_env load_plugins bind_keys setup_options setup_toolchains setup_aliases setup_functions finalize; do
+for _current in \
+        initialize \
+        prepare_env \
+        load_plugins \
+        bind_keys \
+        setup_options \
+        setup_toolchains \
+        setup_aliases \
+        setup_functions \
+        finalize; \
+    do
     phase_"$_current"
     __phase_hook "platform" "$_current"
     __phase_hook "profile" "$_current"

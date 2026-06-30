@@ -6,9 +6,29 @@
     {{- $osid = printf "%s-unknown" .chezmoi.os -}}
   {{- end -}}
 {{- end -}}
-{{- $profiles := list "server-homelab" "server-linode" "vm-homelab" "lxc-homelab" "desktop" -}}
+{{- $profiles := dict 
+  "desktop" (dict "lscolors_theme" "tokyonight-night")
+  "server-homelab" (dict "lscolors_theme" "lava")
+  "vm-homelab" (dict "lscolors_theme" "catppuccin-latte")
+  "lxc-homelab" (dict "lscolors_theme" "catppuccin-latte")
+  "server-linode" (dict "lscolors_theme" "lava")
+  "sandbox" (dict "lscolors_theme" "nord")
+-}}
+{{- $profile_keys := keys $profiles -}}
+{{- $profile_choice := promptChoice "Profile for this machine?" $profile_keys -}}
 
 [data]
 osid = "{{ $osid }}"
-profiles = {{ $profiles | toJson }}
-local_profile = {{ promptChoice "local_profile" "Profile for this machine?" $profiles }}
+{{- range $key, $val := $profiles }}
+[data.profiles.{{ $key }}]
+  {{- range $k, $v := $val }}
+  {{ $k }} = {{ $v | quote }}
+  {{- end }}
+{{- end }}
+
+[data.local_profile]
+name = "{{ $profile_choice }}"
+{{- range $key, $val := index $profiles $profile_choice }}
+{{ $key }} = {{ $val | quote }}
+{{- end }}
+

@@ -14,6 +14,8 @@ platform_prepare_env() {
     export HOMEBREW_API_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles/api"
     export HOMEBREW_NO_ENV_HINTS=1
     export HOMEBREW_AUTO_UPDATE_SECS=604800
+
+    command -v subl &> /dev/null && export EDITOR='subl --wait'
     export EDITOR='code --wait'
 }
 
@@ -24,7 +26,7 @@ platform_setup_functions() {
 }
 
 platform_setup_aliases() {
-    command -v gls &> /dev/null && alias ls='gls --color=auto -A --group-directories-first' || alias ls='ls -A --color=auto'
+    # command -v gls &> /dev/null && alias ls='gls --color=auto -A --group-directories-first' || alias ls='ls -A --color=auto'
 }
 
 platform_load_plugins() {
