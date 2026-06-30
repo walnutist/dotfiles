@@ -1,0 +1,5 @@
+README.md
+.config/zsh/profiles/*
+!.config/zsh/profiles/{{ .local_profile }}.zsh
+.config/zsh/platforms/*
+!.config/zsh/platforms/{{ .osid }}.zsh
