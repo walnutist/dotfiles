@@ -1,0 +1,39 @@
+# =============================================================================
+# platforms/windows.zsh — Windows 平台差量 (Git Bash / WSL)
+# 所有代码按阶段封装，顶层无执行代码。
+# =============================================================================
+
+# --- 阶段 1: 初始化 (命名目录、编辑器) ---
+platform_initialize() {
+    [[ -z $z4h_win_home ]] || hash -d w=$z4h_win_home
+    z4h load   ohmyzsh/ohmyzsh/plugins/vscode 2>/dev/null || true
+    export EDITOR='code --wait'
+    e() {
+      code --wait "$@"
+    }
+}
+
+# --- 阶段 6: 别名 (路径转换、资源管理器、进程) ---
+platform_setup_aliases() {
+    alias pwdw='cygpath -w $(pwd)'
+    alias w2u='cygpath -u'
+    alias u2w='cygpath -w'
+    alias o='explorer'
+    alias oo='explorer .'
+    alias npp='notepad++'
+    alias pkill='taskkill //F //IM' 2>/dev/null
+
+    if [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
+        alias winhome='cd /mnt/c/Users/$(whoami)'
+        alias code='code.exe'
+        alias explorer='explorer.exe'
+    fi
+}
+
+platform_prepare_env() { :; }
+platform_load_plugins() { :; }
+platform_bind_keys() { :; }
+platform_setup_options() { :; }
+platform_setup_toolchains() { :; }
+platform_setup_functions() { :; }
+platform_finalize() { :; }

@@ -3,33 +3,32 @@
   {{- if hasKey .chezmoi.osRelease "id" -}}
     {{- $osid = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
   {{- else -}}
-    {{- $osid = "linux-unknown" -}}
+    {{- $osid = printf "%s-unknown" .chezmoi.os -}}
   {{- end -}}
 {{- end -}}
-
-{{- $choices := list "critical" "essential" "standard" "sandbox" "none" -}}
-{{- $securityLevel := promptChoice "What is the designated security level for this host?" $choices -}}
+{{- $profiles := dict 
+  "desktop" (dict "lscolors_theme" "tokyonight-night")
+  "server-homelab" (dict "lscolors_theme" "lava")
+  "vm-homelab" (dict "lscolors_theme" "catppuccin-latte")
+  "lxc-homelab" (dict "lscolors_theme" "catppuccin-latte")
+  "server-linode" (dict "lscolors_theme" "lava")
+  "sandbox" (dict "lscolors_theme" "nord")
+-}}
+{{- $profile_keys := keys $profiles -}}
+{{- $profile_choice := promptChoice "Profile for this machine?" $profile_keys -}}
 
 [data]
 osid = "{{ $osid }}"
-{{ if eq $securityLevel "critical" -}}
-    dircolorsPreset = "lava"
-{{- else if eq $securityLevel "essential" -}}
-    dircolorsPreset = "dracula"
-{{- else if eq $securityLevel "standard" -}}
-    dircolorsPreset = "tokyonight-night"
-{{- else if eq $securityLevel "sandbox" -}}
-    dircolorsPreset = "nord"
-{{- else -}}
-    dircolorsPreset = ""
+{{- range $key, $val := $profiles }}
+[data.profiles.{{ $key }}]
+  {{- range $k, $v := $val }}
+  {{ $k }} = {{ $v | quote }}
+  {{- end }}
 {{- end }}
 
-{{- $path := printf "platform/%s/chezmoidata.toml" $osid -}}
-{{- if (stat $path) -}}
-    {{ include $path }}
-{{- else if eq .chezmoi.os "linux" -}}
-    {{- $fallback := "platform/linux/chezmoidata.toml" -}}
-    {{- if (stat $fallback) -}}
-        {{ include $fallback }}
-    {{- end -}}
-{{- end -}}
+[data.local_profile]
+name = "{{ $profile_choice }}"
+{{- range $key, $val := index $profiles $profile_choice }}
+{{ $key }} = {{ $val | quote }}
+{{- end }}
+

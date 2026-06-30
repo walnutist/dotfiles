@@ -1,0 +1,18 @@
+# =============================================================================
+# platforms/debian.zsh — Debian/Ubuntu 平台差量
+# 所有代码按阶段封装，顶层无执行代码。
+# =============================================================================
+
+# --- 阶段 2: 工具可用性检查 (fd / bat) ---
+platform_prepare_env() { :; }
+platform_initialize() { :; }
+platform_load_plugins() { :; }
+platform_bind_keys() { :; }
+platform_setup_options() { :; }
+platform_setup_toolchains() {
+    command -v fdfind &> /dev/null && alias fd='fdfind' || true
+    command -v batcat &> /dev/null && alias bat='batcat' || true
+}
+platform_setup_aliases() { :; }
+platform_setup_functions() { :; }
+platform_finalize() { :; }

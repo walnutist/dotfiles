@@ -1,252 +1,257 @@
-# zsh4humans settings
-zstyle ':z4h:' auto-update      'no'
-zstyle ':z4h:' auto-update-days '28'
-zstyle ':z4h:bindkey' keyboard  'mac'
-zstyle ':z4h:' start-tmux no
-zstyle ':z4h:' prompt-at-bottom 'no'
-zstyle ':z4h:' term-shell-integration 'yes'
-zstyle ':z4h:autosuggestions' forward-char 'accept'
-zstyle ':z4h:fzf-complete' recurse-dirs 'no'
-zstyle ':z4h:direnv'         enable 'no'
-zstyle ':z4h:direnv:success' notify 'yes'
-zstyle ':z4h:ssh:*'                   enable 'no'
-# zstyle ':z4h:ssh:example-hostname1'   enable 'yes'
-# zstyle ':z4h:ssh:*.example-hostname2' enable 'no'
-# zstyle ':z4h:ssh:*' send-extra-files '~/.nanorc' '~/.env.zsh'
-z4h install ohmyzsh/ohmyzsh || return
-z4h init || return
-autoload -Uz zmv
+# =============================================================================
+# zshrc — 按阶段 (phase) 初始化
+# =============================================================================
+# 初始化顺序：phase_XXX → platform_XXX → profile_XXX
+# 每个阶段按序执行，平台/Profile 脚本通过同名钩子注入自定义逻辑。
+# 未实现钩子的脚本会被静默跳过（向后兼容）。
 
-# zsh4humans source & load
-z4h load   ohmyzsh/ohmyzsh/plugins/sudo
-z4h load   ohmyzsh/ohmyzsh/plugins/extract
-z4h load   ohmyzsh/ohmyzsh/plugins/gitfast
-z4h load   ohmyzsh/ohmyzsh/plugins/rsync
-z4h load   ohmyzsh/ohmyzsh/plugins/cp
-z4h load   ohmyzsh/ohmyzsh/plugins/virtualenv
-# z4h source   ohmyzsh/ohmyzsh/lib/directories.zsh
-{{ if eq .chezmoi.os "darwin" -}}
-# z4h load   ohmyzsh/ohmyzsh/plugins/sublime
-z4h load   ohmyzsh/ohmyzsh/plugins/vscode
-export EDITOR='code --wait'
-e() {
-  code --wait "$@"
-}
-{{ else if eq .chezmoi.os "linux" -}}
-export EDITOR='nano'
-alias e="$EDITOR"
-{{ end }}
+# =============================================================================
+# 阶段函数定义
+# =============================================================================
 
-# zsh4humans key bindings
-z4h bindkey undo            Ctrl+/       # undo the last command line change
-z4h bindkey redo            Option+/     # redo the last undone command line change
+# --- 阶段 1: 初始化 z4h ---
+# 配置 z4h 行为后执行 install 和 init，此后 z4h 插件系统可用。
+phase_initialize() {
+    zstyle ':z4h:' auto-update      'no'
+    zstyle ':z4h:' auto-update-days '28'
+    zstyle ':z4h:bindkey' keyboard  'mac'
+    zstyle ':z4h:' start-tmux no
+    zstyle ':z4h:' prompt-at-bottom 'no'
+    zstyle ':z4h:' term-shell-integration 'yes'
+    zstyle ':z4h:autosuggestions' forward-char 'accept'
+    zstyle ':z4h:fzf-complete' recurse-dirs 'no'
+    zstyle ':z4h:direnv'         enable 'yes'
+    zstyle ':z4h:direnv:success' notify 'yes'
+    zstyle ':z4h:ssh:*'                   enable 'no'
+    # zstyle ':z4h:ssh:example-hostname1'   enable 'yes'
+    # zstyle ':z4h:ssh:*.example-hostname2' enable 'no'
+    # zstyle ':z4h:ssh:*' send-extra-files '~/.nanorc' '~/.env.zsh'
 
-z4h bindkey z4h-cd-back     Shift+Left   # cd into the previous directory
-z4h bindkey z4h-cd-forward  Shift+Right  # cd into the next directory
-z4h bindkey z4h-cd-up       Shift+Up     # cd into the parent directory
-z4h bindkey z4h-cd-down     Shift+Down   # cd into a child directory
-
-# Define named directories: ~w <=> Windows home directory on WSL.
-[[ -z $z4h_win_home ]] || hash -d w=$z4h_win_home
-
-# Set shell options: http://zsh.sourceforge.net/Doc/Release/Options.html.
-# 基础体验
-setopt glob_dots                # 通配符使用包含隐藏文件
-setopt auto_cd                  # 输入目录名直接跳转
-setopt auto_menu                # 自动菜单补全
-setopt menu_complete            # 允许在补全菜单中选择
-setopt no_beep                  # 禁止蜂鸣声
-setopt interactive_comments	    # 交互模式下允许注释
-setopt no_nomatch               # 匹配失败不报错
-# 历史记录 (优化去重和查找)
-HISTSIZE=2000                   # 内存中保留的条数
-SAVEHIST=50000                  # 文件中保存的条数
-HISTFILE="${ZSH_CACHE_DIR:-$HOME}/.zsh_history"
-setopt extended_history         # 记录时间戳
-setopt share_history            # 多终端实时共享历史
-setopt hist_reduce_blanks       # 删除历史记录中的空行
-setopt hist_ignore_dups         # 忽略连续重复命令
-setopt hist_ignore_space        # 忽略空格开头的命令
-setopt hist_find_no_dups        # 搜索时不显示重复项
-# 禁止使用command-not-found功能，响应速度太慢
-unset command_not_found_handler
-
-# Define environment variables
-# TTY
-export GPG_TTY=$TTY
-# Locales
-export LANG=en_US.UTF-8
-export LC_COLLATE=zh_CN.UTF-8
-# Homebrew mirrors
-export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.ustc.edu.cn/brew.git"
-export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.ustc.edu.cn/homebrew-core.git"
-export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles"
-export HOMEBREW_API_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles/api"
-# Rustup mirrors
-export RUSTUP_DIST_SERVER="https://mirrors.ustc.edu.cn/rust-static"
-export RUSTUP_UPDATE_ROOT="https://mirrors.ustc.edu.cn/rust-static/rustup"
-# UV index mirrors
-export UV_INDEX_URL="https://mirrors.ustc.edu.cn/pypi/simple"
-# Pip index mirrors
-export PIP_TRUSTED_HOST="mirrors.ustc.edu.cn"
-export PIP_INDEX_URL="https://mirrors.ustc.edu.cn/pypi/simple"
-# Go mirrors
-export GO111MODULE=on
-export GOPROXY="https://goproxy.cn,direct"
-export GOSUMDB="sum.golang.google.cn"
-# Hugging-Face mirrors
-export HF_ENDPOINT="https://hf-mirror.com"
-
-# Homebrew
-{{ if eq .chezmoi.os "darwin" -}}
-BREW_EXECUTABLE='{{ findExecutable "brew" (list "/opt/homebrew/bin" "/usr/local/bin") }}'
-export HOMEBREW_NO_ENV_HINTS=1
-export HOMEBREW_AUTO_UPDATE_SECS=604800
-{{ else if eq .chezmoi.os "linux" -}}
-BREW_EXECUTABLE='{{ findExecutable "brew" (list "/home/linuxbrew/.linuxbrew/bin" "~/.linuxbrew/bin") }}'
-export HOMEBREW_NO_ENV_HINTS=1
-export HOMEBREW_AUTO_UPDATE_SECS=604800
-{{ end }}
-[[ -x "$BREW_EXECUTABLE" ]] && eval "$(${BREW_EXECUTABLE} shellenv 2>/dev/null || true)"
-
-# Mise-en-Place
-if command -v mise > /dev/null; then
-    eval "$(mise activate zsh)"
-fi
-
-# Aliases
-# 基础包名兼容
-
-# du 磁盘占用
-alias du="dust"
-# df 磁盘挂载
-alias df="duf"
-
-# top 系统监控
-alias top="btm"
-
-# ping 可视化
-alias ping="gping"
-
-# git diff 美化
-alias diff="delta"
-
-# grep 高速搜索
-alias grep="rg"
-
-# 交互式 git 终端
-alias gitui="lazygit"
-alias lg="lazygit"
-
-# 全文搜索 rg 常用参数
-alias rgs="rg --smart-case"       # 智能大小写搜索
-alias rgh="rg --hidden"           # 包含隐藏文件搜索
-alias rgc="rg --color=always"     # 强制彩色输出
-
-# bat 增强阅读
-alias cat="bat"
-alias less="bat --paging=always"
-
-# 常用快捷
-alias -g ...='../..'
-alias -g ....='../../..'
-alias -g .....='../../../..'
-alias -g ......='../../../../..'
-
-alias -- -='cd -'
-alias 1='cd -1'
-alias 2='cd -2'
-alias 3='cd -3'
-alias 4='cd -4'
-alias 5='cd -5'
-alias 6='cd -6'
-alias 7='cd -7'
-alias 8='cd -8'
-alias 9='cd -9'
-
-{{ if eq .chezmoi.os "darwin" -}}
-command -v gls &> /dev/null && alias ls='gls --color=auto -A --group-directories-first' || alias ls='ls -A --color=auto'
-{{ else if eq .chezmoi.os "linux" -}}
-alias ls="eza --icons --group-directories-first"
-# alias ls='ls --color=auto --group-directories-first'
-{{ end }}
-alias l='ls -lah'
-alias ll='ls -lh'
-
-# 打印PATH
-alias path='echo $PATH | tr -s ":" "\n"'
-
-# 危险操作
-alias rm='rm -i'
-alias cp='cp -i'
-alias mv='mv -i'
-alias md='mkdir -p'
-alias rd='rmdir'
-
-# 常用git操作
-alias g='git'
-alias gs='git status -sb'
-alias ga='git add'
-alias gc='git commit'
-alias gp='git push'
-alias gl='git pull'
-alias gd='git diff'
-alias gco='git checkout'
-
-# Define functions and completions.
-function md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
-compdef _directories md
-# fzf 文件快速打开
-vf() {
-  local file=$(fd | fzf --preview 'bat --color=always {}')
-  [[ -n "$file" ]] && vim "$file"
+    z4h install ohmyzsh/ohmyzsh || return
+    z4h init || return
 }
 
-# fzf 切换目录
-cdf() {
-  local dir=$(fd -t d | fzf --preview 'eza --tree -L1 --icons {}')
-  [[ -n "$dir" ]] && cd "$dir"
-}
+# --- 阶段 2: 环境变量 & 镜像 ---
+# 设置基础环境变量、语言、各工具链镜像源、dircolors/LS_COLORS。
+phase_prepare_env() {
+    # TTY & 语言
+    export GPG_TTY=$TTY
+    export LANG=en_US.UTF-8
+    export LC_COLLATE=zh_CN.UTF-8
 
-# fzf 交互式杀进程
-killf() {
-  ps aux | fzf | awk '{print $2}' | xargs kill -9
-}
+    # 各工具链镜像
+    export RUSTUP_DIST_SERVER="https://mirrors.ustc.edu.cn/rust-static"
+    export RUSTUP_UPDATE_ROOT="https://mirrors.ustc.edu.cn/rust-static/rustup"
+    export UV_INDEX_URL="https://mirrors.ustc.edu.cn/pypi/simple"
+    export PIP_TRUSTED_HOST="mirrors.ustc.edu.cn"
+    export PIP_INDEX_URL="https://mirrors.ustc.edu.cn/pypi/simple"
+    export GO111MODULE=on
+    export GOPROXY="https://goproxy.cn,direct"
+    export GOSUMDB="sum.golang.google.cn"
+    export HF_ENDPOINT="https://hf-mirror.com"
 
-# 交互式切换 git 分支
-gb() {
-  git checkout $(git branch | fzf | sed 's/^* //')
-}
-
-# LS_COLORS is used by GNU ls and Zsh completions. LSCOLORS is used by BSD ls.
-# export LSCOLORS='ExGxDxDxCxDxDxFxFxexEx'
-# export LS_COLORS='fi=00:mi=00:mh=00:ln=01;36:or=01;31:di=01;34:ow=04;01;34:st=34:tw=04;34:'
-# LS_COLORS+='pi=01;33:so=01;33:do=01;33:bd=01;33:cd=01;33:su=01;35:sg=01;35:ca=01;35:ex=01;32'
-
-# TREE_COLORS is used by GNU tree. It looks awful with underlined text, so we turn it off.
-# export TREE_COLORS=${LS_COLORS//04;}
-
-unset LS_COLORS
-preset="{{ .dircolorsPreset }}"
-if [[ -f "$HOME/.dircolors" ]]; then
-    if command -v dircolors &> /dev/null; then
-        eval "$(dircolors $HOME/.dircolors)"
-    else
-        export LS_COLORS="$(cat $HOME/.dircolors | tr '\n' ':')" #从dircolors文件格式转为LS_COLORS格式
+    local lscolors_preset="{{ .local_profile.lscolors_theme }}"
+    # dircolors / LS_COLORS 配置
+    if [[ -f "$ZDOTDIR/lscolors/theme-$lscolors_preset" ]]; then
+        export LS_COLORS="$(<$ZDOTDIR/lscolors/theme-$lscolors_preset)"
+    elif [[ "" != "$lscolors_preset" ]] && command -v vivid &> /dev/null; then
+        export LS_COLORS="$(vivid generate $lscolors_preset)";
+    elif [[ -f "$ZDOTDIR/.lscolors.default" ]]; then
+        export LS_COLORS="$(<$ZDOTDIR/.lscolors.default)"
     fi
-elif [[ -f "$HOME/.dircolors.theme-$preset" ]]; then
-    if command -v dircolors &> /dev/null; then
-        eval "$(dircolors $HOME/.dircolors.theme-$preset)"
-    else
-        export LS_COLORS="$(cat $HOME/.dircolors.theme-$preset | tr '\n' ':')" #从dircolors文件格式转为LS_COLORS格式
+}
+
+# --- 阶段 3: 加载 zsh 插件 ---
+phase_load_plugins() {
+    autoload -Uz zmv
+    z4h load   ohmyzsh/ohmyzsh/plugins/sudo || true
+    z4h load   ohmyzsh/ohmyzsh/plugins/extract || true
+    z4h load   ohmyzsh/ohmyzsh/plugins/gitfast || true
+    z4h load   ohmyzsh/ohmyzsh/plugins/rsync || true
+    z4h load   ohmyzsh/ohmyzsh/plugins/cp || true
+    z4h load   ohmyzsh/ohmyzsh/plugins/virtualenv || true
+    z4h load   ohmyzsh/ohmyzsh/plugins/mise || true
+    z4h load   ohmyzsh/ohmyzsh/plugins/chezmoi || true
+    # z4h source   ohmyzsh/ohmyzsh/lib/directories.zsh
+}
+
+# --- 阶段 4: 绑定按键 ---
+phase_bind_keys() {
+    # Undo / Redo
+    z4h bindkey undo            Ctrl+/          Shift+Tab    # undo the last command line change
+    z4h bindkey redo            Alt+/           Option+/     # redo the last undone command line change
+
+    # 目录导航 (Shift + 方向键)
+    z4h bindkey z4h-cd-back     Alt+Left        Shift+Left   # cd 上一级目录
+    z4h bindkey z4h-cd-forward  Alt+Right       Shift+Right  # cd 上一级目录
+    z4h bindkey z4h-cd-up       Alt+Up          Shift+Up     # cd 父目录
+    z4h bindkey z4h-cd-down     Alt+Down        Shift+Down   # cd 子目录
+
+    # PC only?
+    z4h bindkey z4h-backward-kill-word  Ctrl+Backspace     Ctrl+H
+    z4h bindkey z4h-backward-kill-zword Ctrl+Alt+Backspace
+}
+
+# --- 阶段 5: shell 选项 & 历史 ---
+phase_setup_options() {
+    # 基础体验
+    setopt glob_dots                # 通配符匹配隐藏文件
+    setopt auto_cd                  # 输入目录名直接跳转
+    setopt auto_menu                # 自动菜单补全
+    setopt menu_complete            # 补全菜单中选择
+    setopt no_beep                  # 禁止蜂鸣声
+    setopt interactive_comments     # 交互模式下允许注释
+    setopt no_nomatch               # 匹配失败不报错
+
+    # 历史记录
+    HISTSIZE=2000                   # 内存中保留的条数
+    SAVEHIST=50000                  # 文件中保存的条数
+    HISTFILE="${ZSH_CACHE_DIR:-$HOME}/.zsh_history"
+    setopt extended_history         # 记录时间戳
+    setopt share_history            # 多终端实时共享历史
+    setopt hist_reduce_blanks       # 删除历史记录中的空行
+    setopt hist_ignore_dups         # 忽略连续重复命令
+    setopt hist_ignore_space        # 忽略空格开头的命令
+    setopt hist_find_no_dups        # 搜索时不显示重复项
+    unset command_not_found_handler   # 禁用 (响应速度太慢)
+}
+
+# --- 阶段 6: 工具链 ---
+phase_setup_toolchains() {
+    # 按需激活 mise 版本管理器。
+    if command -v mise > /dev/null; then
+        eval "$(mise activate zsh)"
     fi
-elif [[ -f "$HOME/.lscolors.theme-$preset" ]]; then
-    export LS_COLORS="$(cat $HOME/.lscolors.theme-$preset)"
-elif [[ "" != "$preset" ]] && command -v vivid &> /dev/null; then
-    export LS_COLORS="$(vivid generate $preset)";
-fi
+}
+
+# --- 阶段 7: 别名 ---
+# 按用途分组：工具替换 → 快捷路径 → 危险操作 → git 操作
+phase_setup_aliases() {
+    # 工具替换 (更友好的替代品)
+    command -v dust &> /dev/null && alias du="dust"                 # 磁盘占用
+    command -v duf &> /dev/null && alias df="duf"                   # 磁盘挂载
+    command -v btm &> /dev/null && alias top="btm"                  # 系统监控
+    command -v gping &> /dev/null && alias ping="gping"             # 可视化 ping
+    command -v delta &> /dev/null && alias diff="delta"             # git diff 美化
+    command -v rg &> /dev/null && alias grep="rg"                   # 高速搜索
+    command -v rg &> /dev/null && alias rgs="rg --smart-case"       # 智能大小写搜索
+    command -v rg &> /dev/null && alias rgh="rg --hidden"           # 包含隐藏文件搜索
+    command -v rg &> /dev/null && alias rgc="rg --color=always"     # 强制彩色输出
+    command -v bat &> /dev/null && alias cat="bat"                  # bat 增强阅读
+    command -v bat &> /dev/null && alias less="bat --paging=always"
+    command -v eza &> /dev/null && alias ls="eza --icons --group-directories-first"                   # ls
 
 
+    # 快捷路径 (.., ..., ...., .....)
+    alias -g ...='../..'
+    alias -g ....='../../..'
+    alias -g .....='../../../..'
+    alias -g ......='../../../../..'
+    alias -- -='cd -'            # 回到上一个目录
+    alias 1='cd -1'
+    alias 2='cd -2'
+    alias 3='cd -3'
+    alias 4='cd -4'
+    alias 5='cd -5'
+    alias 6='cd -6'
+    alias 7='cd -7'
+    alias 8='cd -8'
+    alias 9='cd -9'
 
-# 引入~/.zshrc
-[[ -f $HOME/.zshrc ]] && . $HOME/.zshrc
+    # 文件浏览
+    # alias ls="ls --group-directories-first"
+    alias l='ls -lah'
+    alias ll='ls -lh'
+    alias path='echo $PATH | tr -s ":" "\n"'
+
+    # 危险操作 (加 -i 确认)
+    alias rm='rm -i'
+    alias cp='cp -i'
+    alias mv='mv -i'
+    alias md='mkdir -p'
+    alias rd='rmdir'
+
+    # git 操作
+    alias g='git'
+    alias gs='git status -sb'
+    alias ga='git add'
+    alias gc='git commit'
+    alias gp='git push'
+    alias gl='git pull'
+    alias gd='git diff'
+    alias gco='git checkout'
+    command -v lazygit &> /dev/null && alias gitui="lazygit"        # 交互式 git 终端
+    command -v lazygit &> /dev/null && alias lg="lazygit"
+}
+
+# --- 阶段 8: 自定义函数 ---
+phase_setup_functions() {
+    # md: 创建目录并跳转 (带补全)
+    md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
+    compdef _directories md
+
+    # vf: fzf 文件快速打开
+    vf() {
+      local file=$(fd | fzf --preview 'bat --color=always {}')
+      [[ -n "$file" ]] && open "$file"
+    }
+
+    # cdf: fzf 切换目录
+    cdf() {
+      local dir=$(fd -t d | fzf --preview 'eza --tree -L1 --icons {}')
+      [[ -n "$dir" ]] && cd "$dir"
+    }
+
+    # killf: fzf 交互式杀进程
+    killf() {
+      ps aux | fzf | awk '{print $2}' | xargs kill -9
+    }
+
+    # gb: fzf 交互式切换 git 分支
+    gb() {
+      git checkout $(git branch | fzf | sed 's/^* //')
+    }
+}
+
+# --- 阶段 9: 收尾 ---
+phase_finalize() {
+    # 引入用户自定义 ~/.zshrc。
+    [[ -f $HOME/.zshrc ]] && . $HOME/.zshrc
+}
+
+# =============================================================================
+# 阶段执行器
+# =============================================================================
+# 先 source 脚本加载所有函数定义，再按阶段调用对应钩子。
+# 脚本只含函数定义，source 多次无副作用。
+
+# 加载 platform / profile 脚本（只定义函数，不执行）
+[[ -r "${ZSH_CONFIG_DIR}/platforms/{{ .osid }}.zsh" ]] && source "${ZSH_CONFIG_DIR}/platforms/{{ .osid }}.zsh"
+[[ -r "${ZSH_CONFIG_DIR}/profiles/{{ .local_profile.name }}.zsh" ]] && source "${ZSH_CONFIG_DIR}/profiles/{{ .local_profile.name }}.zsh"
+
+# 按阶段执行：主 phase → platform 钩子 → profile 钩子
+__phase_hook() {
+    local phase="$1"
+    local func_name="${2}_${phase}"
+    if typeset -f "$func_name" >/dev/null 2>&1; then
+        "$func_name"
+    fi
+}
+
+for _current in \
+        initialize \
+        prepare_env \
+        load_plugins \
+        bind_keys \
+        setup_options \
+        setup_toolchains \
+        setup_aliases \
+        setup_functions \
+        finalize; \
+    do
+    phase_"$_current"
+    __phase_hook "platform" "$_current"
+    __phase_hook "profile" "$_current"
+done
+unset _current
+

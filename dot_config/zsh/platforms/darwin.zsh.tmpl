@@ -1,0 +1,42 @@
+# =============================================================================
+# platforms/darwin.zsh — macOS 平台差量
+# 所有代码按阶段封装，顶层无执行代码。
+# =============================================================================
+
+# --- 阶段 1: 初始化 (z4h 已 init) ---
+platform_initialize() {}
+
+# --- 阶段 2: 环境变量 ---
+platform_prepare_env() {
+    export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.ustc.edu.cn/brew.git"
+    export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.ustc.edu.cn/homebrew-core.git"
+    export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles"
+    export HOMEBREW_API_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles/api"
+    export HOMEBREW_NO_ENV_HINTS=1
+    export HOMEBREW_AUTO_UPDATE_SECS=604800
+
+    command -v subl &> /dev/null && export EDITOR='subl --wait'
+    export EDITOR='code --wait'
+}
+
+platform_setup_functions() {
+    e() {
+      code --wait "$@"
+    }
+}
+
+platform_setup_aliases() {
+    # command -v gls &> /dev/null && alias ls='gls --color=auto -A --group-directories-first' || alias ls='ls -A --color=auto'
+}
+
+platform_load_plugins() {
+    z4h load   ohmyzsh/ohmyzsh/plugins/sublime 2>/dev/null || true
+    z4h load   ohmyzsh/ohmyzsh/plugins/vscode 2>/dev/null || true
+}
+
+platform_bind_keys() { :; }
+platform_setup_options() { :; }
+platform_setup_toolchains() {
+    BREW_EXECUTABLE='{{ findExecutable "brew" (list "/opt/homebrew/bin" "/usr/local/bin") }}'
+}
+platform_finalize() { :; }
